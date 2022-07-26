@@ -180,7 +180,7 @@ disadvanges:
 Different types of load balancers:
 
 1. Layer 4 - they look at the info in the transport layer, e.g. source, destination IP address, ports in header, but not contents of the package
-2. Layer 7 - they look at the application layer to udnersand how to distribute the requests to the computation resources.
+2. Layer 7 - they look at the application layer to understand how to distribute the requests to the computation resources.
 
 layer 4 require less time and computing resources than layer 7 load balancers.
 
@@ -214,13 +214,31 @@ relational databases:
 ways of scaling databases:
 
 1. master- slave replication
-2. master-master replication
-3. sharding - data is distributed across different databases. leads to lesser number of read or write operations, but more complex application logic and complexity added to the system
-4. federation - splits database by function. reduces overall read and write but can lead to expensive joins if a lot of joins and access needs to be made across these different tables.
-5. denormalization - improves read performances at the expense of write performances. redundant copies of data are written in multiple tables to avoid expensive joins.
-6. SQL tuning. use benchmark and profiling to identify how to improve a database.
+- The master serves reads and writes, replicating writes to one or more slaves, which serve only reads. Slaves can also replicate to additional slaves in a tree-like fashion. If the master goes offline, the system can continue to operate in read-only mode until a slave is promoted to a master or a new master is provisioned.
+- disadvantages:
+    -
+    - There is a potential for loss of data if the master fails before any newly written data can be replicated to other nodes.
+    - Writes are replayed to the read replicas. If there are a lot of
+    writes, the read replicas can get bogged down with replaying writes and
+    can't do as many reads.
+    - The more read slaves, the more you have to replicate, which leads to greater replication lag.
+    - On some systems, writing to the master can spawn multiple threads to write in parallel, whereas read replicas only support writing
+    sequentially with a single thread.
+    - Replication adds more hardware and additional complexity.
+1. master-master replication
+- Both masters serve reads and writes and coordinate with each other on writes. If either master goes down, the system can continue to operate with both reads and writes.
+- disadvantages:
+    -
+    - You'll need a load balancer or you'll need to make changes to your application logic to determine where to write.
+    - Most master-master systems are either loosely consistent (violating
+    ACID) or have increased write latency due to synchronization.
+    - Conflict resolution comes more into play as more write nodes are added and as latency increases.
+1. sharding - data is distributed across different databases. leads to lesser number of read or write operations, but more complex application logic and complexity added to the system
+2. federation - splits database by function. reduces overall read and write but can lead to expensive joins if a lot of joins and access needs to be made across these different tables.
+3. denormalization - improves read performances at the expense of write performances. redundant copies of data are written in multiple tables to avoid expensive joins.
+4. SQL tuning. use benchmark(simulate high load situations) and profiling(track performance issues) to identify how to improve a database.
 
-e.g. use CHAR instead of varchar, use indexes on columns that are more commonly searched for in tables, use decimal for currency to avoid floating point representation errors.
+e.g. use CHAR instead of varchar, use indexes on columns that are more commonly searched for or aggregated on in tables, use decimal for currency to avoid floating point representation errors.
 
 ## Caching
 
