@@ -1,2 +1,2 @@
-# system_design
+# System Design
 Repository of system design questions and notes
